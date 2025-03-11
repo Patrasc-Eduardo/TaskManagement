@@ -1,0 +1,85 @@
+version: '3.8'
+services:
+  # 1) PostgreSQL Database
+  db:
+    image: postgres:17
+    container_name: db
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=TaskManagement
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  # 2) Keycloak (latest version)
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: keycloak
+    environment:
+      # Built-in admin user for Keycloak's admin console
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+
+      # Tell Keycloak to use PostgreSQL
+      - KC_DB=postgres
+      - KC_DB_USERNAME=admin
+      - KC_DB_PASSWORD=admin
+      - KC_DB_URL_HOST=db
+      - KC_DB_URL_DATABASE=masterdb
+
+    command: >
+      start-dev
+      --http-port=8081
+    depends_on:
+      - db
+    ports:
+      - "8081:8081"
+
+  # 3) Auth Service
+  auth-service:
+    build: ./auth-service
+    container_name: auth-service
+    environment:
+      # Database config for Auth Service
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/masterdb
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=admin
+
+      # Keycloak config for ROPC or other flows
+      - KEYCLOAK_HOST=keycloak
+      - KEYCLOAK_PORT=8081
+      - KEYCLOAK_REALM=myrealm
+      - KEYCLOAK_CLIENT_ID=auth-client
+      - KEYCLOAK_CLIENT_SECRET=secret123
+
+    depends_on:
+      - db
+      - keycloak
+    ports:
+      - "8082:8080"
+
+  # 4) Task Service
+  task-service:
+    build: ./task-service
+    container_name: task-service
+    environment:
+      # Database config for Task Service
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/TaskManagement
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+
+      # Keycloak config for JWT validation
+      - KEYCLOAK_HOST=keycloak
+      - KEYCLOAK_PORT=8081
+      - KEYCLOAK_REALM=myrealm
+
+    depends_on:
+      - db
+      - keycloak
+    ports:
+      - "8083:8080"
+
+volumes:
+  db-data:
