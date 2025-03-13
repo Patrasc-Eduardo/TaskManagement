@@ -1,0 +1,390 @@
+{
+	"info": {
+		"_postman_id": "9928c8bb-9a0a-4814-bbc8-dbe39e813b5c",
+		"name": "TaskManagement",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "19797788"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Parse the JSON response\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"// Extract the token\r",
+									"let token = jsonData.access_token;\r",
+									"\r",
+									"// Set it as an environment variable\r",
+									"pm.environment.set(\"access_token\", token);\r",
+									"\r",
+									"// (Optional) if you have a refresh token:\r",
+									"pm.environment.set(\"refresh_token\", jsonData.refresh_token);\r",
+									"\r",
+									"// You can log a message to Postman console\r",
+									"console.log(\"Access token set to:\", token);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"edi\",\r\n    \"password\": \"password\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:{{auth_service_port}}/v1/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{auth_service_port}}",
+							"path": [
+								"v1",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "SignUp",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"username\": \"edi2\",\r\n  \"password\": \"password\",\r\n  \"email\": \"edi2@gmail.com\",\r\n  \"firstName\": \"Edi\",\r\n  \"lastName\": \"Edi\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:{{auth_service_port}}/v1/auth/signup",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{auth_service_port}}",
+							"path": [
+								"v1",
+								"auth",
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Keycloak Config",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:{{keycloak_port}}/realms/{{realm_name}}/.well-known/openid-configuration",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{keycloak_port}}",
+							"path": [
+								"realms",
+								"{{realm_name}}",
+								".well-known",
+								"openid-configuration"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Task API",
+			"item": [
+				{
+					"name": "Create Task",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-User",
+								"value": "{{current_user}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"My First Task0\",\n  \"description\": \"Some details0\",\n  \"dueDate\": \"2025-03-12T10:00:00\",\n  \"status\": \"DONE\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:{{task_service_port}}/api/v1/tasks",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{task_service_port}}",
+							"path": [
+								"api",
+								"v1",
+								"tasks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Tasks (Paged)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-User",
+								"value": "{{current_user}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:{{task_service_port}}/api/v1/tasks?page=0&size=5&sort=dueDate,asc",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{task_service_port}}",
+							"path": [
+								"api",
+								"v1",
+								"tasks"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "5"
+								},
+								{
+									"key": "sort",
+									"value": "dueDate,asc"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Task by ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-User",
+								"value": "{{current_user}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:{{task_service_port}}/api/v1/tasks/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{task_service_port}}",
+							"path": [
+								"api",
+								"v1",
+								"tasks",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Task (Partial or Full)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-User",
+								"value": "{{current_user}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Updated Title\",\n  \"description\": null,\n  \"status\": \"IN_PROGRESS\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:{{task_service_port}}/api/v1/tasks/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{task_service_port}}",
+							"path": [
+								"api",
+								"v1",
+								"tasks",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Share Task",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-User",
+								"value": "{{current_user}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:{{task_service_port}}/api/v1/tasks/2/share?user=edi2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{task_service_port}}",
+							"path": [
+								"api",
+								"v1",
+								"tasks",
+								"2",
+								"share"
+							],
+							"query": [
+								{
+									"key": "user",
+									"value": "edi2"
+								},
+								{
+									"key": "",
+									"value": null,
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Task",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "X-User",
+								"value": "{{current_user}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:{{task_service_port}}/api/v1/tasks/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{task_service_port}}",
+							"path": [
+								"api",
+								"v1",
+								"tasks",
+								"2"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
