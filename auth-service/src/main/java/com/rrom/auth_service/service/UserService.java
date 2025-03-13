@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -31,14 +30,13 @@ public class UserService {
     @Transactional
     public User createUserGlobally(SignUpRequest signUpRequest) {
         String keycloakUserId;
+
         try {
-            // 1) Create user in Keycloak
             keycloakUserId = keycloakClient.createUserInKeycloak(signUpRequest);
         } catch (IOException e) {
             throw new KeycloakException("Keycloak creation failed: " + e.getMessage(), e);
         }
 
-        // 2) Create user in local DB (transactional)
         User localUser = new User();
         localUser.setKeycloakUserId(keycloakUserId);
         localUser.setUsername(signUpRequest.getUsername());
@@ -50,7 +48,6 @@ public class UserService {
             localUser = userRepository.save(localUser);
             log.info("User saved in local DB with ID: {}", localUser.getId());
         } catch (Exception dbException) {
-            // 3) If DB creation fails, remove user from Keycloak
             log.error("DB save failed, rolling back Keycloak user: {}", keycloakUserId);
             keycloakClient.deleteUserFromKeycloak(keycloakUserId);
             throw new RuntimeException("Failed to save user in DB, rolled back Keycloak user.", dbException);
