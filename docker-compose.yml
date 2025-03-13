@@ -48,6 +48,8 @@ services:
       KEYCLOAK_CLIENT_ID: auth-client
       KEYCLOAK_CLIENT_SECRET: secret123
 
+      SERVER_PORT: 8082
+
       SPRING_DATASOURCE_URL: "jdbc:postgresql://db:5432/postgres"
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin
@@ -73,6 +75,8 @@ services:
       KEYCLOAK_PORT: 8081
       KEYCLOAK_REALM: rrom-realm
       REALM_PATH: "http://keycloak:8081/realms/rrom-realm"
+
+
 
       SPRING_DATASOURCE_URL: "jdbc:postgresql://db:5432/postgres"
       SPRING_DATASOURCE_USERNAME: admin

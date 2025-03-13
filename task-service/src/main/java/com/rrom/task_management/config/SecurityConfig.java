@@ -18,16 +18,16 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authz -> authz
-                        .anyRequest().authenticated()  // All other endpoints require authentication
+                        .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 ->
-                        oauth2.jwt(jwt -> jwt.decoder(jwtDecoder()))); // Enable JWT authentication for the resource server
+                        oauth2.jwt(jwt -> jwt.decoder(jwtDecoder())));
 
         return http.build();
     }
 
     @Bean
     public JwtDecoder jwtDecoder() {
-        return JwtDecoders.fromIssuerLocation(realmPath); // Replace with your issuer URL
+        return JwtDecoders.fromIssuerLocation(realmPath);
     }
 }
