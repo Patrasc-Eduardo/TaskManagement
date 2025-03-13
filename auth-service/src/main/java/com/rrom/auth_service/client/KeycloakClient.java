@@ -57,11 +57,9 @@ public class KeycloakClient {
     private final RestTemplate restTemplate = new RestTemplate();
 
     public KeycloakTokenResponse requestToken(String username, String password) throws IOException {
-        // Endpoint de token Keycloak
         String tokenUrl = String.format("http://%s:%s/realms/%s/protocol/openid-connect/token",
                 keycloakHost, keycloakPort, realm);
 
-        // Construim corpul request-ului
         Map<String, String> body = new HashMap<>();
         body.put("grant_type", "password");
         body.put("client_id", clientId);
@@ -69,11 +67,9 @@ public class KeycloakClient {
         body.put("username", username);
         body.put("password", password);
 
-        // HEADERS
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        // Convert map -> form data
         String formData = body.entrySet().stream()
                 .map(e -> e.getKey() + "=" + UriUtils.encode(e.getValue(), StandardCharsets.UTF_8))
                 .collect(Collectors.joining("&"));
@@ -92,7 +88,6 @@ public class KeycloakClient {
     public String createUserInKeycloak(SignUpRequest signUpRequest) throws IOException {
         String adminToken = getAdminAccessToken();
 
-        // Build user payload
         Map<String, Object> userPayload = new HashMap<>();
         userPayload.put("username", signUpRequest.getUsername());
         userPayload.put("enabled", true);
@@ -100,7 +95,6 @@ public class KeycloakClient {
         userPayload.put("lastName", signUpRequest.getLastName());
         userPayload.put("email", signUpRequest.getEmail());
 
-        // Add password credentials
         Map<String, Object> credentials = new HashMap<>();
         credentials.put("type", "password");
         credentials.put("value", signUpRequest.getPassword());
@@ -108,7 +102,6 @@ public class KeycloakClient {
 
         userPayload.put("credentials", List.of(credentials));
 
-        // POST to /admin/realms/{realm}/users
         String url = String.format("http://%s:%s/admin/realms/%s/users",
                 keycloakHost, keycloakPort, realm);
 
@@ -131,7 +124,6 @@ public class KeycloakClient {
             throw new KeycloakException("Keycloak user created but no 'Location' header returned.");
         }
 
-        // Extract user ID from location
         String locationStr = location.toString();
         String keycloakUserId = locationStr.substring(locationStr.lastIndexOf('/') + 1);
         log.info("Created user in Keycloak with ID: {}", keycloakUserId);
@@ -175,7 +167,6 @@ public class KeycloakClient {
         String tokenUrl = String.format("http://%s:%s/realms/%s/protocol/openid-connect/token",
                 keycloakHost, keycloakPort, adminRealm);
 
-        // Using the "admin-cli" approach with username/password
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add("grant_type", "password");
         formData.add("client_id", adminClientId);

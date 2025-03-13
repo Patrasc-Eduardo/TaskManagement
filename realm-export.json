@@ -1,0 +1,15 @@
+{
+  "realm": "rrom-realm",
+  "enabled": true,
+  "users": [],
+  "clients": [
+    {
+      "clientId": "auth-client",
+      "enabled": true,
+      "secret": "secret123",
+      "directAccessGrantsEnabled": true,
+      "publicClient": false,
+      "protocol": "openid-connect"
+    }
+  ]
+}
